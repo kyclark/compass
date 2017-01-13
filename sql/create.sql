@@ -16,15 +16,6 @@ create table case_worker (
 
 drop table if exists case_worker_to_client;
 
-drop table if exists client_phone;
-create table client_phone (
-  client_phone_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  client_id int unsigned not null,
-  phone varchar(50),
-  type varchar(50),
-  foreign key (client_id) references client (client_id) on delete cascade
-) ENGINE=InnoDB;
-
 drop table if exists race;
 create table race (
   race_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -81,33 +72,27 @@ create table person (
   last_name varchar(100) DEFAULT NULL,
   aka varchar(100) default null,
   dob date default null,
-  is_homeless enum('Y', 'N') default 'N',
   is_disabled enum('Y', 'N') default 'N',
   is_employed enum('Y', 'N') default 'N',
-  original_date_service date default null,
-  email varchar(255) default null,
+  homeless_at_entry enum('Y', 'N') default 'N',
+  opened_bank_account enum('Y', 'N') default 'N',
+  debt_load int unsigned default 0,
+  entry_date date default null,
+  monthly_employment_income_at_entry int unsigned default 0,
+  monthly_employment_income_at_exit int unsigned default 0,
   notes text,
   KEY last_name (last_name),
   foreign key (case_worker_id) references case_worker (case_worker_id) on delete cascade,
   foreign key (gender_id) references gender (gender_id) on delete cascade,
+  foreign key (marital_status_id) references marital_status (marital_status_id) on delete cascade,
   foreign key (ethnicity_id) references ethnicity (ethnicity_id) on delete cascade,
+  foreign key (race_id) references race (race_id) on delete cascade,
   foreign key (residency_id) references residency (residency_id) on delete cascade,
   foreign key (education_level_id) references education_level (education_level_id) on delete cascade,
   PRIMARY KEY (person_id)
 ) ENGINE=InnoDB;
 
-drop table if exists employment;
-create table employment (
-  employment_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  person_id int unsigned NOT NULL,
-  employer varchar(100),
-  income double(10,2),
-  start_date date,
-  end_date date,
-  foreign key (person_id) references person (person_id) on delete cascade
-) ENGINE=InnoDB;
-
-# Alimony, Employment
+# Alimony, Employment, WIC, SNAP, DES Childcare, SSDI
 drop table if exists income_type;
 create table income_type (
   income_type_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -136,49 +121,34 @@ create table household (
   notes text
 ) ENGINE=InnoDB;
 
-drop table if exists household_member_type;
-create table household_member_type (
-  household_member_type_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  household_name varchar(100)
-) ENGINE=InnoDB;
-# Head, Dependent
-
 drop table if exists household_member;
 create table household_member (
   household_member_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
   household_member_type_id int unsigned default null,
   household_id int unsigned NOT NULL,
   person_id int unsigned NOT NULL,
+  is_head tinyint default '0',
   foreign key (household_member_id) references household_member_type (household_member_type_id) on delete cascade,
   foreign key (household_id) references household (household_id) on delete cascade,
   foreign key (person_id) references person (person_id) on delete cascade
 ) ENGINE=InnoDB;
 
-drop table if exists household_to_program;
-create table household_to_program (
-  household_to_program_id int unsigned NOT NULL AUTO_INCREMENT primary key,
-  household_id int unsigned NOT NULL,
+drop table if exists person_to_program;
+create table person_to_program (
+  person_to_program_id int unsigned NOT NULL AUTO_INCREMENT primary key,
+  person_id int unsigned NOT NULL,
   program_id int unsigned NOT NULL,
   entry_date date default null,
   exit_date date default null,
-  foreign key (household_id) references household (household_id) on delete cascade,
+  foreign key (person_id) references person (person_id) on delete cascade,
   foreign key (program_id) references program (program_id) on delete cascade
 ) ENGINE=InnoDB;
 
-# WIC, SNAP, DES Childcare, SSDI
-drop table if exists benefit;
-create table benefit (
-  benefit_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  benefit_name varchar(50)
-) ENGINE=InnoDB;
-
-drop table if exists household_benefit;
-create table household_benefit (
-  household_benefit_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  household_id int unsigned NOT NULL,
-  benefit_id int unsigned NOT NULL,
-  start_date date,
-  end_date date,
-  foreign key (household_id) references household (household_id) on delete cascade,
-  foreign key (benefit_id) references benefit (benefit_id) on delete cascade
+drop table if exists debt_payment;
+create table debt_payment (
+  debt_payment_id int unsigned NOT NULL AUTO_INCREMENT primary key,
+  person_id int unsigned NOT NULL,
+  amount int unsigned default 0,
+  payment_date date default null,
+  foreign key (person_id) references person (person_id) on delete cascade
 ) ENGINE=InnoDB;
