@@ -26,7 +26,7 @@ create table client_phone (
 ) ENGINE=InnoDB;
 
 drop table if exists race;
-create table race_id (
+create table race (
   race_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
   race varchar(50)
 ) ENGINE=InnoDB;
@@ -70,12 +70,12 @@ drop table if exists person;
 create table person (
   person_id int unsigned NOT NULL AUTO_INCREMENT,
   case_worker_id int unsigned default null,
-  ethnicity_id unsigned int default null,
-  race_id unsigned int default null,
-  residency_id unsigned int default null,
-  gender_id unsigned int default null,
-  education_level_id unsigned int default null,
-  marital_status_id unsigned int default null,
+  ethnicity_id int unsigned default null,
+  race_id int unsigned default null,
+  residency_id int unsigned default null,
+  gender_id int unsigned default null,
+  education_level_id int unsigned default null,
+  marital_status_id int unsigned default null,
   case_num int unsigned not null default 0,
   first_name varchar(100) DEFAULT NULL,
   last_name varchar(100) DEFAULT NULL,
@@ -93,7 +93,7 @@ create table person (
   foreign key (ethnicity_id) references ethnicity (ethnicity_id) on delete cascade,
   foreign key (residency_id) references residency (residency_id) on delete cascade,
   foreign key (education_level_id) references education_level (education_level_id) on delete cascade,
-  PRIMARY KEY (client_id)
+  PRIMARY KEY (person_id)
 ) ENGINE=InnoDB;
 
 drop table if exists employment;
@@ -120,9 +120,9 @@ create table income (
   income_type_id int unsigned NOT NULL,
   person_id int unsigned NOT NULL,
   foreign key (income_type_id) references income_type (income_type_id) on delete cascade,
-  foreign key (person_id) references person (person_id) on delete cascade
+  foreign key (person_id) references person (person_id) on delete cascade,
   start_date date,
-  end_date date,
+  end_date date
 ) ENGINE=InnoDB;
 
 drop table if exists household;
